@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dũng Vương &amp; Linh Mai — Thiệp Cưới</title>
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://dung-vuong.github.io/DnL_Wedding/">
 <meta property="og:title" content="Dũng Vương &amp; Linh Mai — Thiệp Cưới">
 <meta property="og:description" content="Trân trọng kính mời quý khách đến chung vui cùng gia đình chúng tôi trong ngày trọng đại — 23.01.2027">
-<meta property="og:image" content="og-image.jpg">
+<meta property="og:image" content="https://dung-vuong.github.io/DnL_Wedding/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Dũng Vương &amp; Linh Mai — Thiệp Cưới">
 <meta name="twitter:description" content="Trân trọng kính mời quý khách đến chung vui cùng gia đình chúng tôi trong ngày trọng đại — 23.01.2027">
-<meta name="twitter:image" content="og-image.jpg">
+<meta name="twitter:image" content="https://dung-vuong.github.io/DnL_Wedding/og-image.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=EB+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Quicksand:wght@300;400;500;600;700&family=Mea+Culpa&display=swap" rel="stylesheet">
 <style>
@@ -94,6 +95,76 @@
   }
   .lang-switch-full button:last-child { border-right: none; }
   .lang-switch-full button.active {
+    background: var(--red);
+    color: var(--cream);
+  }
+
+  /* ---------------- LANGUAGE SELECT MODAL ---------------- */
+  body.lang-modal-open { overflow: hidden; }
+  .lang-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(20, 10, 8, 0.82);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 1;
+    transition: opacity 0.4s ease;
+  }
+  .lang-modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .lang-modal-box {
+    background: var(--cream);
+    border: 1px solid var(--gold);
+    border-radius: 14px;
+    padding: 34px 30px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+    transform: scale(1);
+    transition: transform 0.4s ease;
+  }
+  .lang-modal-overlay.hidden .lang-modal-box { transform: scale(0.92); }
+  .lang-modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    color: var(--red-ink);
+    font-size: 23px;
+    margin-bottom: 8px;
+  }
+  .lang-modal-sub {
+    font-size: 12px;
+    color: var(--ink);
+    opacity: 0.65;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .lang-modal-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .lang-modal-buttons button {
+    padding: 13px 0;
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    background: none;
+    color: var(--red);
+    font-family: 'Quicksand', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .lang-modal-buttons button:hover,
+  .lang-modal-buttons button:active {
     background: var(--red);
     color: var(--cream);
   }
@@ -743,7 +814,19 @@
   }
 </style>
 </head>
-<body>
+<body class="lang-modal-open">
+
+<div class="lang-modal-overlay" id="langModalOverlay">
+  <div class="lang-modal-box">
+    <div class="lang-modal-title">Select your language</div>
+    <div class="lang-modal-sub">Vui lòng chọn ngôn ngữ · 请选择语言</div>
+    <div class="lang-modal-buttons">
+      <button data-lang="vi">Tiếng Việt</button>
+      <button data-lang="zh">中文</button>
+      <button data-lang="en">English</button>
+    </div>
+  </div>
+</div>
 
 <div class="topbar" id="topbar">
   <span data-i18n="topbar_prefix">Đám cưới của chúng tôi</span>
@@ -1065,6 +1148,19 @@ document.getElementById('langSwitch').addEventListener('click', (e) => {
   applyLang(btn.getAttribute('data-lang'));
 });
 
+/* ============== Language select modal ============== */
+const langModalOverlay = document.getElementById('langModalOverlay');
+langModalOverlay.addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  const lang = btn.getAttribute('data-lang');
+  applyLang(lang);
+  langModalOverlay.classList.add('hidden');
+  document.body.classList.remove('lang-modal-open');
+  tryPlayBgm();
+  setTimeout(() => { langModalOverlay.remove(); }, 500);
+}, { once: true });
+
 /* ============== Countdown ============== */
 const weddingDate = new Date('2027-01-23T09:00:00-08:00');
 function updateCountdown() {
@@ -1235,8 +1331,6 @@ function tryPlayBgm() {
     });
   }
 }
-tryPlayBgm();
-
 document.getElementById('musicToggle').addEventListener('click', () => {
   if (bgm.paused) {
     bgm.play();
