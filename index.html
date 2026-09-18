@@ -931,6 +931,8 @@
       <div class="cell"><div class="num" id="cd-mins">00</div><div class="label" data-i18n="cd_mins">PHÚT</div></div>
       <div class="cell"><div class="num" id="cd-secs">00</div><div class="label" data-i18n="cd_secs">GIÂY</div></div>
     </div>
+
+    <button type="button" class="calendar-btn" id="addCalendarBtn" onclick="addToCalendar()" data-i18n="btn_add_calendar">+ Thêm vào lịch</button>
   </div>
 </section>
 
@@ -983,16 +985,16 @@
     </div>
 
     <details class="faq-item" open>
+      <summary data-i18n="faq_q5">Làm sao để xác nhận tham dự?</summary>
+      <div class="faq-a" data-i18n="faq_a5">Quý khách vui lòng xác nhận số lượng người tham dự chậm nhất 1 tháng trước ngày cưới bằng cách gọi điện đến số 408-772-2910. Chúng tôi rất mong nhận được phản hồi sớm để chuẩn bị chu đáo nhất.</div>
+    </details>
+    <details class="faq-item">
       <summary data-i18n="faq_q3">Có chỗ đậu xe không?</summary>
       <div class="faq-a" data-i18n="faq_a3">Nhà hàng có bãi đậu xe miễn phí cho khách mời. Vui lòng đến sớm 15-20 phút để có chỗ đậu thuận tiện.</div>
     </details>
     <details class="faq-item">
       <summary data-i18n="faq_q4">Trang phục nên mặc như thế nào?</summary>
       <div class="faq-a" data-i18n="faq_a4">Trang phục lịch sự, trang trọng. Với Lễ Thành Hôn, các tông màu đỏ hoặc tươi sáng được xem là may mắn theo phong tục người Hoa. Xin tránh mặc toàn trắng hoặc toàn đen.</div>
-    </details>
-    <details class="faq-item">
-      <summary data-i18n="faq_q5">Làm sao để xác nhận tham dự?</summary>
-      <div class="faq-a" data-i18n="faq_a5">Quý khách vui lòng xác nhận số lượng người tham dự chậm nhất 1 tháng trước ngày cưới bằng cách gọi điện đến số 408-772-2910. Chúng tôi rất mong nhận được phản hồi sớm để chuẩn bị chu đáo nhất.</div>
     </details>
   </div>
 </section>
@@ -1215,6 +1217,61 @@ function buildCalendar() {
   }
 }
 buildCalendar();
+
+/* ============== Add to Calendar ============== */
+function isIOSDevice() {
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  const isAppleTouch = (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPadOS 13+
+  return /iPad|iPhone|iPod/.test(ua) && !window.MSStream || isAppleTouch;
+}
+
+function addToCalendar() {
+  const title = 'Lễ Cưới Dũng Vương & Linh Mai';
+  const location = 'Pearl Bay Restaurant, 43635 Boscell Rd, Fremont, CA 94538';
+  const description = 'Trân trọng kính mời quý khách đến chung vui cùng gia đình hai họ. Giờ đón khách: 5:30 chiều · Giờ thành hôn: 6:00 chiều.';
+
+  // Event: Sat Jan 23, 2027, 5:30 PM - 9:30 PM Pacific Time (UTC-8)
+  const dtStartUTC = '20270124T013000Z';
+  const dtEndUTC = '20270124T053000Z';
+
+  if (isIOSDevice()) {
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//DungLinh Wedding//VN',
+      'CALSCALE:GREGORIAN',
+      'BEGIN:VEVENT',
+      'UID:' + Date.now() + '@dunglinh-wedding',
+      'DTSTAMP:' + dtStartUTC,
+      'DTSTART:' + dtStartUTC,
+      'DTEND:' + dtEndUTC,
+      'SUMMARY:' + title,
+      'LOCATION:' + location,
+      'DESCRIPTION:' + description,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'DungLinh-Wedding.ics');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  } else {
+    const gcalDates = '20270123T173000/20270123T213000';
+    const gcalUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+      + '&text=' + encodeURIComponent(title)
+      + '&dates=' + gcalDates
+      + '&details=' + encodeURIComponent(description)
+      + '&location=' + encodeURIComponent(location)
+      + '&ctz=America/Los_Angeles';
+    window.open(gcalUrl, '_blank', 'noopener');
+  }
+}
 
 /* ============== Slideshow (placeholder art) ============== */
 const slideColors = ['#C1272D','#A8221F','#7E1613','#B08A4E'];
